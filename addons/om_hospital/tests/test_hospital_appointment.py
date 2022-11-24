@@ -70,17 +70,17 @@ class TestHospitalAppointment(common.TransactionCase):
     def change_patient_name(self):
         self.patient.name = 'Patient 1'
 
-    def test_patient_exists(self):
+    def test_patient_exists_by_id(self):
         patients = self.patient.env['hospital.patient'].search(
             [('name', '=', self.patient.name), ('id', '!=', self.patient.id)])
         self.assertTrue(patients is not None)
 
-    def test_doctor_exists(self):
+    def test_doctor_exists_by_id(self):
         doctors = self.doctor.env['hospital.doctor'].search(
             [('doctor_name', '=', self.doctor.doctor_name), ('id', '!=', self.doctor.id)])
         self.assertTrue(doctors is not None)
 
-    def test_appointment_exists(self):
+    def test_appointment_exists_by_id(self):
         appointments = self.appointment.env['hospital.appointment'].search(
             [('name', '=', self.appointment.name), ('id', '!=', self.appointment.id)])
         self.assertTrue(appointments is not None)
