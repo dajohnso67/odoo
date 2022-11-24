@@ -24,23 +24,45 @@ class TestHospitalAppointment(common.TransactionCase):
         })
 
         cls.appointment = cls.env['hospital.appointment'].create({
-            'name': 'Appt 1',
+            'name': 'New',
             'patient_id': cls.patient.id,
             'doctor_id': cls.doctor.id,
         })
 
+    def test_unlink_appointment(self):
+        appointment_count = self.env['hospital.appointment'].search_count([('doctor_id', '=', self.doctor.id)])
+
+        appointment = self.env['hospital.appointment'].with_context(tracking_disable=True)
+        vals = {
+            'name': 'New',
+            'patient_id': self.patient.id,
+            'doctor_id': self.doctor.id,
+        }
+        appointment.create(vals.copy())
+
+        appointment_count_before = self.env['hospital.appointment'].search_count([('doctor_id', '=', self.doctor.id)])
+
+        self.assertGreaterEqual(appointment_count, 1)
+        self.appointment.unlink()
+
+        appointment_count_after = self.env['hospital.appointment'].search_count([('doctor_id', '=', self.doctor.id)])
+        self.assertGreater(appointment_count_before, appointment_count_after)
+
     def test_create_appointment(self):
         appointment = self.env['hospital.appointment'].with_context(tracking_disable=True)
         vals = {
-            'name': 'Appt 1/1/2022',
+            'name': 'New',
             'patient_id': self.patient.id,
             'doctor_id': self.doctor.id,
         }
         test_appointment = appointment.create(vals.copy())
 
-        appointment_count = self.env['hospital.appointment'].search_count([('doctor_id', '=', self.doctor.id)])
-        self.assertGreaterEqual(appointment_count, 1)
-        self.assertTrue(test_appointment.name.startswith('Appt'))
+        self.doctor._compute_appointment_count()
+        self.patient._compute_appointment_count()
+
+        self.assertGreaterEqual(self.patient.appointment_count, 1)
+        self.assertGreaterEqual(self.doctor.appointment_count, 1)
+        self.assertTrue(test_appointment.name, 'New')
 
     def change_patient_age(self):
         self.patient.age = 0
