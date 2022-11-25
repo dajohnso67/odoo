@@ -107,6 +107,12 @@ class TestHospitalAppointment(common.TransactionCase):
         self.assertEqual(self.appointment.gender, 'female')
         self.assertEqual(self.appointment.note, 'Test patient note')
 
+    def test_onchange_null_patient_id_notes_gender_empty(self):
+        self.appointment.patient_id = None
+        self.appointment.onchange_patient_id()
+        self.assertFalse(self.appointment.gender)
+        self.assertFalse(self.appointment.note)
+
     def test_appointment_action(self):
         self.appointment.action_confirm()
         self.assertEqual(self.appointment.state, 'confirm')
