@@ -29,6 +29,14 @@ class TestHospitalAppointment(common.TransactionCase):
             'doctor_id': cls.doctor.id,
         })
 
+    def test_new_patent_notes_is_set_when_empty(self):
+        new_patient = self.env['hospital.patient'].create({
+            'name': 'Patient 1234',
+            'gender': 'male',
+            'age': 50,
+        })
+        self.assertEqual(new_patient.note, 'New Patient')
+
     def test_unlink_appointment(self):
         appointment_count = self.env['hospital.appointment'].search_count([('doctor_id', '=', self.doctor.id)])
 
@@ -63,6 +71,23 @@ class TestHospitalAppointment(common.TransactionCase):
         self.assertGreaterEqual(self.patient.appointment_count, 1)
         self.assertGreaterEqual(self.doctor.appointment_count, 1)
         self.assertTrue(test_appointment.name, 'New')
+
+    def test_new_patent_name_exists_on_create(self):
+        new_patient = self.env['hospital.patient'].create({
+            'name': 'Patient Duplicate',
+            'gender': 'male',
+            'age': 50,
+        })
+
+        with self.assertRaises(ValidationError):
+            self.change_patient_name_same_id(new_patient)
+
+    def change_patient_name_same_id(self, new_patient):
+        new_patient.create({
+            'name': 'Patient Duplicate',
+            'gender': 'male',
+            'age': 50,
+        })
 
     def change_patient_age(self):
         self.patient.age = 0
